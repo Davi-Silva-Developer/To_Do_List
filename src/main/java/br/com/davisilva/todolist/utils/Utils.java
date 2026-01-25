@@ -1,5 +1,5 @@
-package br.com.davisilva.todolist.utils;
 // Pacote de classes utilitárias
+package br.com.davisilva.todolist.utils;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
