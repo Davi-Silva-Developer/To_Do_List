@@ -58,13 +58,58 @@ public class TaskController {
     }
 
     // --- MÉTODO DE ATUALIZAR (PUT) ---
+    // Mapeia requisições HTTP do tipo PUT para /tasks/{id}
+    // Usado para ATUALIZAR uma tarefa existente
     @PutMapping("/{id}")
-    public TaskModel update(@RequestBody TaskModel tasksModel, HttpServletRequest request, @PathVariable UUID id){
-        // O  retorno de void para TaskModel para ser mais padrão
-        // Mas podes ajustar a lógica de update depois.
-        var idUser = request.getAttribute("idUser");
-        tasksModel.setIdUser((UUID) idUser);
-        tasksModel.setId(id);
-        return this.taskRepository.save(tasksModel); // Exemplo simples de retorno
+
+
+    public ResponseEntity<?> update(@RequestBody TaskModel taskRequest,HttpServletRequest request, @PathVariable UUID id) {
+
+         // Recupera o id do usuário autenticado
+         // Esse valor foi setado no filtro de autenticação
+        UUID idUser = (UUID) request.getAttribute("idUser");
+
+         // Busca a task no banco pelo ID
+        TaskModel task = taskRepository.findById(id)
+
+                .orElseThrow(() -> new RuntimeException("Task não encontrada"));
+        // Caso não exista, lança erro
+
+        if (!task.getIdUser().equals(idUser)) {
+            // Verifica se a task pertence ao usuário logado
+            // Impede que um usuário altere a task de outro
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Você não pode alterar essa task");
+        }
+
+        if (!task.getIdUser().equals(idUser)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (taskRequest.getTitle() != null){
+            task.setTitle(taskRequest.getTitle());
+        }
+
+        if (taskRequest.getDescricao() != null){
+            task.setDescricao(taskRequest.getDescricao());}
+
+
+        if (taskRequest.getHrInicio() != null){
+            task.setHrInicio(taskRequest.getHrInicio());
+        }
+
+        if (taskRequest.getHrfim() != null){
+            task.setHrfim(taskRequest.getHrfim());
+        }
+
+        if (taskRequest.getPrioridade() != null){
+            task.setPrioridade(taskRequest.getPrioridade());
+        }
+
+        return ResponseEntity.ok(taskRepository.save(task));
     }
+
+
+
 }

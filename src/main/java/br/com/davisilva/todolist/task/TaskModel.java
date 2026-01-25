@@ -26,6 +26,7 @@ public class TaskModel {
     private String prioridade;
     private UUID idUser;
 
+    @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
