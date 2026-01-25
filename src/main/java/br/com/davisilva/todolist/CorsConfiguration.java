@@ -11,7 +11,7 @@ public class CorsConfiguration {
 
         @Override
         public void addCorsMappings(CorsRegistry registry) {
-            // Estamos a dizer: "Permite tudo (/**) vindo de qualquer lugar (*)"
+            // "Permite tudo (/**) vindo de qualquer lugar (*)"
             registry.addMapping("/**")
                     .allowedOrigins("*")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");

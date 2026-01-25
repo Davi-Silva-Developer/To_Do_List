@@ -53,7 +53,7 @@ public class FilterTaskAut extends OncePerRequestFilter {
             }
 
             //  Decodifica a senha
-            // Try/Catch opcional caso venha lixo no header, manter simples
+            // Try/Catch  caso venha lixo no header, manter simples
             var user_password = autorizacao.substring("Basic".length()).trim();
             byte[] decodificando = Base64.getDecoder().decode(user_password);
             var decodificado = new String(decodificando);
