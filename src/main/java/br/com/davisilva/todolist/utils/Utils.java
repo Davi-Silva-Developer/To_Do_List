@@ -1,4 +1,5 @@
 package br.com.davisilva.todolist.utils;
+// Pacote de classes utilitárias
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -10,25 +11,35 @@ import java.util.Set;
 
 public class Utils {
 
+        // Copia propriedades do source para o target
+        // Ignora campos que estão null no source
     public static void copyNOnNullProperties(Object source, Object target){
         BeanUtils.copyProperties(source, target, getNullProperttuNames(source));
     }
 
+        // Retorna os nomes das propriedades que estão null
     public static String[] getNullProperttuNames(Object source){
 
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        PropertyDescriptor[] pds = src.getPropertyDescriptors();
+        // Permite acessar propriedades dinamicamente
+        BeanWrapper src = new BeanWrapperImpl(source);
 
+        // Lista todas as propriedades do objeto
+        PropertyDescriptor[] pds = src.getPropertyDescriptors();
+            // Armazena nomes das propriedades nulas
         Set<String> emptyNames = new HashSet<>();
 
-        for (PropertyDescriptor pd: pds){
+        // Obtém o valor da propriedade
+        for (PropertyDescriptor pd : pds) {
             Object srcValue = src.getPropertyValue(pd.getName());
-            if(srcValue == null){
+
+            // Adiciona o nome se o valor for null
+            if (srcValue == null) {
                 emptyNames.add(pd.getName());
+
             }
         }
+        // Converte o Set em array
+        return emptyNames.toArray(new String[0]);
 
-        String[] result = new String[emptyNames.size()];
-        return emptyNames.toArray(result);
     }
 }

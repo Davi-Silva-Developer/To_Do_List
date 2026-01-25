@@ -1,5 +1,6 @@
 package br.com.davisilva.todolist.task;
 
+import br.com.davisilva.todolist.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,13 +32,13 @@ public class TaskController {
         var currentDate = LocalDateTime.now();
 
         // Validação 1: Data atual vs Data Início/Fim
-        if(currentDate.isAfter(taskModel.getHrInicio()) || currentDate.isAfter(taskModel.getHrfim())){
+        if (currentDate.isAfter(taskModel.getHrInicio()) || currentDate.isAfter(taskModel.getHrfim())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("A data de inicio / data de termino deve ser maior do que a data atual.");
         }
 
         // Validação 2: Data Início vs Data Fim
-        if(taskModel.getHrInicio().isAfter(taskModel.getHrfim())){
+        if (taskModel.getHrInicio().isAfter(taskModel.getHrfim())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("A data de inicio deve ser menor do que a data de termino");
         }
@@ -51,9 +52,9 @@ public class TaskController {
     // --- MÉTODO DE LISTAR TAREFAS (GET) ---
     // Este método serve como  "Teste de Conexão". Se o Login funcionar, ele retorna 200 "OK".
     @GetMapping("/")
-    public List<TaskModel> list(HttpServletRequest request){
+    public List<TaskModel> list(HttpServletRequest request) {
         var idUser = request.getAttribute("idUser");
-        var tasks = this.taskRepository.findByIdUser((UUID)idUser);
+        var tasks = this.taskRepository.findByIdUser((UUID) idUser);
         return tasks;
     }
 
@@ -62,54 +63,12 @@ public class TaskController {
     // Usado para ATUALIZAR uma tarefa existente
     @PutMapping("/{id}")
 
+    public TaskModel update(@RequestBody TaskModel taskModel, HttpServletRequest request, @PathVariable UUID id) {
 
-    public ResponseEntity<?> update(@RequestBody TaskModel taskRequest,HttpServletRequest request, @PathVariable UUID id) {
-
-         // Recupera o id do usuário autenticado
-         // Esse valor foi setado no filtro de autenticação
-        UUID idUser = (UUID) request.getAttribute("idUser");
-
-         // Busca a task no banco pelo ID
-        TaskModel task = taskRepository.findById(id)
-
-                .orElseThrow(() -> new RuntimeException("Task não encontrada"));
-        // Caso não exista, lança erro
-
-        if (!task.getIdUser().equals(idUser)) {
-            // Verifica se a task pertence ao usuário logado
-            // Impede que um usuário altere a task de outro
-
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Você não pode alterar essa task");
-        }
-
-        if (!task.getIdUser().equals(idUser)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        if (taskRequest.getTitle() != null){
-            task.setTitle(taskRequest.getTitle());
-        }
-
-        if (taskRequest.getDescricao() != null){
-            task.setDescricao(taskRequest.getDescricao());}
+        var task = this.taskRepository.findById(id).orElse(null);
+        Utils.copyNOnNullProperties(taskModel, task);
+        return this.taskRepository.save(task);
 
 
-        if (taskRequest.getHrInicio() != null){
-            task.setHrInicio(taskRequest.getHrInicio());
-        }
-
-        if (taskRequest.getHrfim() != null){
-            task.setHrfim(taskRequest.getHrfim());
-        }
-
-        if (taskRequest.getPrioridade() != null){
-            task.setPrioridade(taskRequest.getPrioridade());
-        }
-
-        return ResponseEntity.ok(taskRepository.save(task));
     }
-
-
-
 }
