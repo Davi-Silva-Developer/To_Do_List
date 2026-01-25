@@ -19,7 +19,7 @@ public class TaskModel {
     private String descricao;
 
     @Column(length = 50)
-    private String title; // Essa notação fala que essa tabela tera 50 caracteres no max
+    private String title; // Essa anotação fala que essa coluna tera 50 caracteres no max
 
     private LocalDateTime hrInicio;
     private LocalDateTime hrfim;

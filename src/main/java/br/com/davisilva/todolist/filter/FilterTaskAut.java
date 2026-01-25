@@ -20,60 +20,71 @@ public class FilterTaskAut extends OncePerRequestFilter {
     private IUserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain Chain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
         var servletpath = request.getServletPath();
 
-        if (servletpath.equals("/tasks/")){
+        //  Verifica se estamos na rota de tarefas
+        if (servletpath.startsWith("/tasks/")) {
 
+            // --- BLOCO DE SEGURANÇA CORS (MANUAL) ---
+            // Adiciona estes cabeçalhos em TODAS as respostas (Sucesso ou Erro)
+            // Isso garante que o navegador consegue ler o erro 401 se a senha estiver errada
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+            response.setHeader("Access-Control-Max-Age", "3600");
 
-            //pegar autenticação (username e passworld) codificado em Base64
+            // Se for o espião (OPTIONS), devolve OK e para aqui.
+            if (request.getMethod().equals("OPTIONS")) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                return;
+            }
+            // ----------------------------------------
+
+            //  Pega a autenticação
             var autorizacao = request.getHeader("Authorization");
-            System.out.println("Antes da decodificação da base64: " + autorizacao);
 
-            //Vai pegar todo o conjunto e tirar apenas a parte "Basic" e os espaço
-            var user_password = autorizacao.substring("Basic".length()).trim();
-            System.out.println("Antes da decodificação da base64 sem o ´basic´: " + user_password);
-
-            //Decodificando a username e password que vem em Base64
-            byte[] decodificando = Base64.getDecoder().decode(user_password);
-            System.out.println("Durante a decodificação da base64 para byte: " + decodificando);
-
-            //Transforma os bytes em String.
-            var decodificado = new String(decodificando);
-            System.out.println("Depois da decodificação da base64: " + decodificado);
-
-            String[] credencial = decodificado.split(":"); // << separando o ´username´ do ´password´  cada um em uma variavel.
-            String username = credencial[0]; // ´username´ na posição 0.
-            String password = credencial[1]; // ´password´ na posição 1.
-            System.out.println("Autorização");
-            System.out.println(username);
-            System.out.println(password);
-
-
-            //2 passo validar Usuario
-            var user = this.userRepository.findByUsername(username); //<< verificando se o usuario estar no banco de dados
-            if(user == null){
-                response.sendError(401);
-                System.out.println("Usuário não existe.");
-            }else{
-                //3 passo validar senha
-                var passwordverify = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword()); // << validando a senha
-                if (passwordverify.verified){  //verificando se a senha é verdadeira
-                    Chain.doFilter(request, response);
-                }else{
-                    response.sendError(401);
-                    System.out.println("Senha incorreta.");
-                }
-
+            // Se não tiver senha (ou header vazio)
+            if (autorizacao == null) {
+                response.sendError(401, "Usuário sem autenticação");
+                return;
             }
 
+            //  Decodifica a senha
+            // Try/Catch opcional caso venha lixo no header, manter simples
+            var user_password = autorizacao.substring("Basic".length()).trim();
+            byte[] decodificando = Base64.getDecoder().decode(user_password);
+            var decodificado = new String(decodificando);
 
+            String[] credencial = decodificado.split(":");
+            String username = credencial[0];
+            String password = credencial[1];
 
-        }else {
-            response.sendError(401);
+            // Valida no Banco
+            var user = this.userRepository.findByUsername(username);
+
+            if (user == null) {
+                // Usuário não existe
+                response.sendError(401, "Usuário não encontrado");
+            } else {
+                //  Valida Senha
+                var passwordVerify = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
+
+                if (passwordVerify.verified) {
+                    // SUCESSO: Passa o ID para o controller
+                    request.setAttribute("idUser", user.getId());
+                    chain.doFilter(request, response);
+                } else {
+                    // SENHA ERRADA
+                    response.sendError(401, "Senha incorreta");
+                }
+            }
+
+        } else {
+            // Se não for rota /tasks/, deixa passar para o próximo filtro
+            chain.doFilter(request, response);
         }
-
-
     }
 }
