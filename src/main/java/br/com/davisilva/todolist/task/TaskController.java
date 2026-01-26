@@ -2,6 +2,7 @@ package br.com.davisilva.todolist.task;
 
 import br.com.davisilva.todolist.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class TaskController {
 
     // --- MÉTODO DE CRIAR TAREFAS (POST) ---
     @PostMapping("/")
-    public ResponseEntity create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
+    public ResponseEntity create(@Valid @RequestBody TaskModel taskModel, HttpServletRequest request) {
         System.out.println("chegou no controller");
 
         // extraindo o id do cliente atribuindo na var 'idUser'
@@ -62,7 +63,6 @@ public class TaskController {
     // Mapeia requisições HTTP do tipo PUT para /tasks/{id}
     // Usado para ATUALIZAR uma tarefa existente
     @PutMapping("/{id}")
-
     public ResponseEntity update(@RequestBody TaskModel taskModel, HttpServletRequest request, @PathVariable UUID id) {
 
         var task = this.taskRepository.findById(id).orElse(null);
@@ -85,7 +85,7 @@ public class TaskController {
 
         var taskUpdated = this.taskRepository.save(task);
 
-        return ResponseEntity.ok().body(this.taskRepository.save(taskUpdated));
+        return ResponseEntity.ok().body(taskUpdated);
 
 
     }
