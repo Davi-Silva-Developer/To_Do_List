@@ -33,3 +33,36 @@ O projeto tem como objetivo consolidar conhecimentos em desenvolvimento backend,
 git clone [https://github.com/Davi-Silva-Developer/nome-do-repositorio.git](https://github.com/Davi-Silva-Developer/nome-do-repositorio.git)
 cd nome-do-repositorio
 mvn spring-boot:run
+A aplicação estará disponível em: http://localhost:8080
+
+Endpoints principais
+GET /tasks/ - Lista as tarefas associadas ao utilizador autenticado
+
+POST /tasks/ - Cria uma nova tarefa
+
+PUT /tasks/{id} - Atualiza as informações de uma tarefa existente
+
+Exemplo de Requisição (POST /tasks/)
+JSON
+{
+  "title": "Estudar Spring Boot",
+  "descricao": "Rever anotações de JPA e validações",
+  "hrInicio": "2024-05-10T08:00:00",
+  "hrfim": "2024-05-10T12:00:00",
+  "prioridade": "ALTA"
+}
+Conceitos aplicados
+API REST
+
+Arquitetura em camadas (Controller, Service, Repository)
+
+Persistência com JPA / Hibernate
+
+Integração com base de dados MySQL
+
+Boas práticas com Spring Boot
+
+Autor
+Davi Silva LinkedIn: https://www.linkedin.com/in/davi-silva-dev
+
+GitHub: https://github.com/Davi-Silva-Developer
